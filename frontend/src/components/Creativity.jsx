@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
-
+import cat from "../assets/images/cat.gif"
 export default function Creativity() {
   return (
-    <section className="w-full pt-40 bg-white h-130 flex flex-col md:flex-row items-start justify-center py-20 px-6 md:px-20">
+    <section className="w-full pt-26 bg-white h-130 flex flex-col md:flex-row items-start justify-center py-20 px-6 md:px-20">
       {/* Left Side - Icon and Heading */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
@@ -13,9 +13,9 @@ export default function Creativity() {
       >
         {/* Cat Icon */}
         <img
-          src="/cat-icon.png" // Replace with your actual cat icon path
+          src={cat} // Replace with your actual cat icon path
           alt="Cat Icon"
-          className="w-12 h-12"
+          className="w-30 h-30"
         />
 
         {/* Heading */}
@@ -30,7 +30,7 @@ export default function Creativity() {
         whileInView={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6 }}
         viewport={{ once: true }}
-        className="mt-8 md:mt-0 md:w-1/2 text-left space-y-6"
+        className="mt-8 md:mt-15 md:w-1/2 text-left space-y-6"
       >
         {/* Paragraph */}
         <p className="text-gray-600 text-base leading-relaxed">
