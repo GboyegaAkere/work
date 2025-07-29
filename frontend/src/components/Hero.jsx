@@ -16,12 +16,12 @@ const phrases = [
 ];
 
 const captions = [
-  { title: "Studio Theatre", description: "Yoto’s identity, environmental graphics and packaging for an audio player that kids can control." },
-  { title: "Tech Branding", description: "Crafting digital experiences for innovative technology companies worldwide." },
-  { title: "Cultural Exhibits", description: "Visual storytelling for leading cultural institutions and art exhibitions." },
+  { title: "Studio Theatre", description: "Yoto’s identity, environmental graphics can control." },
+  { title: "Tech Branding", description: "Crafting digital experiences for innovative." },
+  { title: "Cultural Exhibits", description: "Visual storytelling for leading cultural institutions ." },
   { title: "Fashion Identity", description: "Designing timeless visual identities for modern fashion brands." },
-  { title: "Education Projects", description: "Creating engaging educational tools and interactive design for learning." },
-  { title: "Travel Experiences", description: "Building immersive branding for travel and lifestyle companies." },
+  { title: "Education Projects", description: "Creating engaging educational tools ." },
+  { title: "Travel Experiences", description: "Building immersive branding for travel ." },
 ];
 
 const Hero = () => {
