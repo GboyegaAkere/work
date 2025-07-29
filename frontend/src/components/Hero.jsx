@@ -18,10 +18,10 @@ const phrases = [
 const captions = [
   { title: "Studio Theatre", description: "Yoto’s identity, environmental graphics can control." },
   { title: "Tech Branding", description: "Crafting digital experiences for innovative." },
-  { title: "Cultural Exhibits", description: "Visual storytelling for leading cultural institutions ." },
+  { title: "Cultural Exhibits", description: "Visual storytelling for leading cultural institutions." },
   { title: "Fashion Identity", description: "Designing timeless visual identities for modern fashion brands." },
-  { title: "Education Projects", description: "Creating engaging educational tools ." },
-  { title: "Travel Experiences", description: "Building immersive branding for travel ." },
+  { title: "Education Projects", description: "Creating engaging educational tools." },
+  { title: "Travel Experiences", description: "Building immersive branding for travel." },
 ];
 
 const Hero = () => {
@@ -29,6 +29,7 @@ const Hero = () => {
   const [popupOpen, setPopupOpen] = useState(false);
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [isHeroVisible, setIsHeroVisible] = useState(true);
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
 
   const heroRef = useRef(null);
   const intervalRef = useRef(null);
@@ -63,22 +64,29 @@ const Hero = () => {
       ([entry]) => setIsHeroVisible(entry.isIntersecting),
       { threshold: 0.1 }
     );
-
     if (heroRef.current) observer.observe(heroRef.current);
-
     return () => {
       if (heroRef.current) observer.unobserve(heroRef.current);
     };
   }, []);
 
+  // Track footer visibility
+  useEffect(() => {
+    const footerElement = document.querySelector("footer");
+    if (!footerElement) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsFooterVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(footerElement);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <>
       {/* HERO SECTION */}
-      <section
-        ref={heroRef}
-        className="relative w-full h-screen overflow-hidden"
-      >
-        {/* Background Image */}
+      <section ref={heroRef} className="relative w-full h-screen overflow-hidden">
+        {/* Background */}
         <div className="absolute inset-0">
           <img
             src={heroImages[bgIndex]}
@@ -110,19 +118,6 @@ const Hero = () => {
                   {phrases[phraseIndex]}
                 </motion.span>
               </AnimatePresence>
-              {/* Chevron Icon */}
-              <motion.svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-                stroke="currentColor"
-                className="w-4 h-4"
-                animate={{ rotate: popupOpen ? 180 : 0 }}
-                transition={{ duration: 0.3 }}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </motion.svg>
             </span>
           </button>
         </div>
@@ -137,12 +132,8 @@ const Hero = () => {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.4 }}
             >
-              <p className="font-semibold text-base">
-                {captions[bgIndex].title}
-              </p>
-              <p className="text-xs hidden md:block">
-                {captions[bgIndex].description}
-              </p>
+              <p className="font-semibold text-base">{captions[bgIndex].title}</p>
+              <p className="text-xs hidden md:block">{captions[bgIndex].description}</p>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -163,7 +154,7 @@ const Hero = () => {
 
       {/* Sticky Bottom Button */}
       <AnimatePresence>
-        {!isHeroVisible && (
+        {!isHeroVisible && !isFooterVisible && (
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
@@ -189,25 +180,13 @@ const Hero = () => {
                     {phrases[phraseIndex]}
                   </motion.span>
                 </AnimatePresence>
-                <motion.svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-4 h-4"
-                  animate={{ rotate: popupOpen ? 180 : 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </motion.svg>
               </span>
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Popup Modal (Pentagram Style) */}
+      {/* Popup Modal */}
       <AnimatePresence>
         {popupOpen && (
           <motion.div
@@ -219,26 +198,24 @@ const Hero = () => {
           >
             <motion.div
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-xl p-5 max-w-sm sm:max-w-xl w-full shadow-lg relative cursor-auto"
+              className="bg-white rounded-xl p-5 max-w-sm sm:max-w-xl w-full shadow-lg relative"
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.8 }}
             >
-              {/* Mobile-only Close Icon */}
+              {/* Close Icon (Mobile) */}
               <button
                 className="absolute -top-6 left-1/2 -translate-x-1/2 bg-white border rounded-full w-10 h-10 flex items-center justify-center shadow hover:bg-gray-100 md:hidden"
                 onClick={() => setPopupOpen(false)}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-gray-600">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                ✕
               </button>
 
-              {/* Desktop Image */}
+              {/* Image */}
               <img
                 src={heroImages[bgIndex]}
                 alt="popup"
-                className="rounded-md w-full h-64 object-cover hidden md:block"
+                className="rounded-md w-full h-64 object-cover"
               />
 
               {/* Tags */}
@@ -248,14 +225,11 @@ const Hero = () => {
                   "Brand Identity",
                   "Brand Strategy",
                   "Campaigns",
-                  "Data Driven Experiences",
                   "Digital Experiences",
                   "Exhibitions",
                   "Industrial/Product Design",
                   "Motion Graphics & Film",
                   "Packaging",
-                  "Publications",
-                  "Signage & Environmental Graphics",
                   "Typefaces",
                 ].map((tag, i) => (
                   <div

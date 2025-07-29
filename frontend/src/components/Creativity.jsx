@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 export default function Creativity() {
   return (
-    <section className="w-full bg-white h-130 flex flex-col md:flex-row items-start justify-center py-20 px-6 md:px-20">
+    <section className="w-full pt-40 bg-white h-130 flex flex-col md:flex-row items-start justify-center py-20 px-6 md:px-20">
       {/* Left Side - Icon and Heading */}
       <motion.div
         initial={{ opacity: 0, x: -50 }}
