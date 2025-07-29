@@ -27,7 +27,7 @@ const ScrollBtn = () => {
         exit={{ opacity: 0 }}
         transition={{ duration: 0.4 }}
         onClick={scrollToTop}
-        className="fixed right-6 bottom-25 bg-gray-800 text-white p-3 rounded-full shadow-lg hover:bg-black transition"
+        className="fixed right-6 bottom-25 bg-gray-800 text-white p-3 rounded-md shadow-lg hover:bg-black transition"
       >
         <ChevronUp className="w-5 h-5" />
       </motion.button>
