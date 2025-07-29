@@ -1,5 +1,4 @@
 /** @format */
-
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import blender from "../assets/images/flower.jpg";
@@ -9,7 +8,6 @@ import hi from "../assets/images/hi.jpg";
 import motor from "../assets/images/motor.jpg";
 
 const heroImages = [blender, hello, hi, hell, hi, motor];
-const popupImages = [blender];
 
 const phrases = [
   "Industrial/Product Design for Consumer Brands",
@@ -17,76 +15,39 @@ const phrases = [
   "Timeless visuals for cultural institutions",
 ];
 
-// Captions synced with heroImages
 const captions = [
-  {
-    title: "Studio Theatre",
-    description:
-      "Yoto’s identity, environmental graphics and packaging for an audio player that kids can control.",
-  },
-  {
-    title: "Tech Branding",
-    description:
-      "Crafting digital experiences for innovative technology companies worldwide.",
-  },
-  {
-    title: "Cultural Exhibits",
-    description:
-      "Visual storytelling for leading cultural institutions and art exhibitions.",
-  },
-  {
-    title: "Fashion Identity",
-    description:
-      "Designing timeless visual identities for modern fashion brands.",
-  },
-  {
-    title: "Education Projects",
-    description:
-      "Creating engaging educational tools and interactive design for learning.",
-  },
-  {
-    title: "Travel Experiences",
-    description:
-      "Building immersive branding for travel and lifestyle companies.",
-  },
+  { title: "Studio Theatre", description: "Yoto’s identity, environmental graphics and packaging for an audio player that kids can control." },
+  { title: "Tech Branding", description: "Crafting digital experiences for innovative technology companies worldwide." },
+  { title: "Cultural Exhibits", description: "Visual storytelling for leading cultural institutions and art exhibitions." },
+  { title: "Fashion Identity", description: "Designing timeless visual identities for modern fashion brands." },
+  { title: "Education Projects", description: "Creating engaging educational tools and interactive design for learning." },
+  { title: "Travel Experiences", description: "Building immersive branding for travel and lifestyle companies." },
 ];
 
 const Hero = () => {
   const [bgIndex, setBgIndex] = useState(0);
   const [popupOpen, setPopupOpen] = useState(false);
-  const [popupIndex, setPopupIndex] = useState(0);
   const [phraseIndex, setPhraseIndex] = useState(0);
+  const [isHeroVisible, setIsHeroVisible] = useState(true);
 
+  const heroRef = useRef(null);
   const intervalRef = useRef(null);
 
-  // Function to start auto-rotation
-  const startAutoRotate = () => {
+  // Auto-rotate hero images
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      setBgIndex((prev) => (prev + 1) % heroImages.length);
+    }, 4000);
+    return () => clearInterval(intervalRef.current);
+  }, []);
+
+  const handleDotClick = (index) => {
+    setBgIndex(index);
+    clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
       setBgIndex((prev) => (prev + 1) % heroImages.length);
     }, 4000);
   };
-
-  // Start auto-rotation on mount
-  useEffect(() => {
-    startAutoRotate();
-    return () => clearInterval(intervalRef.current);
-  }, []);
-
-  // When user clicks dot: set bgIndex and restart timer
-  const handleDotClick = (index) => {
-    setBgIndex(index);
-    clearInterval(intervalRef.current);
-    startAutoRotate();
-  };
-
-  // Popup image slideshow
-  useEffect(() => {
-    if (!popupOpen) return;
-    const interval = setInterval(() => {
-      setPopupIndex((prev) => (prev + 1) % popupImages.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [popupOpen]);
 
   // Phrase rotation
   useEffect(() => {
@@ -96,78 +57,157 @@ const Hero = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Track hero visibility
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsHeroVisible(entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+
+    if (heroRef.current) observer.observe(heroRef.current);
+
+    return () => {
+      if (heroRef.current) observer.unobserve(heroRef.current);
+    };
+  }, []);
+
   return (
-    <section className="relative w-full h-screen overflow-hidden">
-      {/* Background Image */}
-      <div className="absolute inset-0">
-        <img
-          src={heroImages[bgIndex]}
-          alt="background"
-          className="w-full h-full object-cover transition-opacity duration-1000"
-        />
-      </div>
+    <>
+      {/* HERO SECTION */}
+      <section
+        ref={heroRef}
+        className="relative w-full h-screen overflow-hidden"
+      >
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <img
+            src={heroImages[bgIndex]}
+            alt="background"
+            className="w-full h-full object-cover transition-opacity duration-1000"
+          />
+        </div>
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-opacity-20" />
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-opacity-20" />
 
-      {/* Center Translucent Box with Animated Text */}
-      <div className="relative z-10 h-full flex items-center justify-center">
-        <button
-          onClick={() => setPopupOpen(true)}
-          className="bg-white bg-opacity-80 px-6 py-3 rounded-md text-sm text-black shadow-md backdrop-blur-md hover:bg-opacity-90 transition"
-        >
-          We design{" "}
-          <span className="underline underline-offset-4 inline-block min-w-[200px]">
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={phrases[phraseIndex]}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.4 }}
-              >
-                {phrases[phraseIndex]}
-              </motion.span>
-            </AnimatePresence>
-          </span>
-        </button>
-      </div>
-
-      {/* Bottom Left Text (Dynamic per image) */}
-      <div className="absolute bottom-4 left-6 z-10 text-white text-sm max-w-xs">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={bgIndex}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.4 }}
+        {/* Center Button */}
+        <div className="relative z-10 h-full flex items-center justify-center">
+          <button
+            onClick={() => setPopupOpen(true)}
+            className="bg-white bg-opacity-80 px-6 py-3 rounded-md text-sm text-black shadow-md backdrop-blur-md hover:bg-opacity-90 transition"
           >
-            {/* Heading - Always Visible */}
-            <p className="font-semibold text-base">{captions[bgIndex].title}</p>
+            We design{" "}
+            <span className="inline-flex items-center gap-2 min-w-[220px]">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={phrases[phraseIndex]}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.4 }}
+                  className="font-medium"
+                >
+                  {phrases[phraseIndex]}
+                </motion.span>
+              </AnimatePresence>
+              {/* Chevron Icon */}
+              <motion.svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-4 h-4"
+                animate={{ rotate: popupOpen ? 180 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </motion.svg>
+            </span>
+          </button>
+        </div>
 
-            {/* Description - Hidden on Mobile */}
-            <p className="text-xs hidden md:block">
-              {captions[bgIndex].description}
-            </p>
+        {/* Bottom Left Captions */}
+        <div className="absolute bottom-4 left-6 z-10 text-white text-sm max-w-xs">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={bgIndex}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4 }}
+            >
+              <p className="font-semibold text-base">
+                {captions[bgIndex].title}
+              </p>
+              <p className="text-xs hidden md:block">
+                {captions[bgIndex].description}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Bottom Right Dots */}
+        <div className="absolute bottom-4 right-6 z-10 hidden md:flex space-x-3">
+          {heroImages.map((_, index) => (
+            <div
+              key={index}
+              onClick={() => handleDotClick(index)}
+              className={`w-4 h-4 rounded-full cursor-pointer transition-all duration-300 ${
+                index === bgIndex ? "bg-white" : "bg-gray-400"
+              }`}
+            ></div>
+          ))}
+        </div>
+      </section>
+
+      {/* Sticky Bottom Button */}
+      <AnimatePresence>
+        {!isHeroVisible && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            transition={{ duration: 0.4 }}
+            className="fixed bottom-4 left-0 right-0 z-50 flex justify-center"
+          >
+            <button
+              onClick={() => setPopupOpen(true)}
+              className="bg-white bg-opacity-80 px-6 py-3 rounded-md text-sm text-black shadow-md backdrop-blur-md hover:bg-opacity-90 transition"
+            >
+              We design{" "}
+              <span className="inline-flex items-center gap-2 min-w-[220px]">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={phrases[phraseIndex]}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.4 }}
+                    className="font-medium"
+                  >
+                    {phrases[phraseIndex]}
+                  </motion.span>
+                </AnimatePresence>
+                <motion.svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-4 h-4"
+                  animate={{ rotate: popupOpen ? 180 : 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </motion.svg>
+              </span>
+            </button>
           </motion.div>
-        </AnimatePresence>
-      </div>
+        )}
+      </AnimatePresence>
 
-      {/* Bottom Right Dots (Clickable, hidden on mobile) */}
-      <div className="absolute bottom-4 right-6 z-10 hidden md:flex space-x-3">
-        {heroImages.map((_, index) => (
-          <div
-            key={index}
-            onClick={() => handleDotClick(index)}
-            className={`w-4 h-4 rounded-full cursor-pointer transition-all duration-300 ${
-              index === bgIndex ? "bg-white" : "bg-gray-400"
-            }`}
-          ></div>
-        ))}
-      </div>
-
-      {/* Popup Modal with Glass Effect */}
+      {/* Popup Modal (Pentagram Style) */}
       <AnimatePresence>
         {popupOpen && (
           <motion.div
@@ -175,55 +215,67 @@ const Hero = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            onClick={() => setPopupOpen(false)}
           >
             <motion.div
-              className="bg-white rounded-xl p-4 max-w-xl w-full shadow-lg"
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-xl p-5 max-w-sm sm:max-w-xl w-full shadow-lg relative cursor-auto"
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.8 }}
             >
+              {/* Mobile-only Close Icon */}
+              <button
+                className="absolute -top-6 left-1/2 -translate-x-1/2 bg-white border rounded-full w-10 h-10 flex items-center justify-center shadow hover:bg-gray-100 md:hidden"
+                onClick={() => setPopupOpen(false)}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 text-gray-600">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {/* Desktop Image */}
               <img
-                src={popupImages[popupIndex]}
+                src={heroImages[bgIndex]}
                 alt="popup"
-                className="rounded-md w-full h-64 object-cover"
+                className="rounded-md w-full h-64 object-cover hidden md:block"
               />
-              <div className="grid grid-cols-3 gap-2 mt-4 text-xs text-center text-black">
+
+              {/* Tags */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4 text-xs text-center text-black">
                 {[
-                  "Arts & Culture",
-                  "Tech",
-                  "Health",
-                  "Fashion",
-                  "Education",
-                  "Travel",
-                  "Real Estate",
-                  "Finance",
-                  "Publishing",
+                  "Books",
+                  "Brand Identity",
+                  "Brand Strategy",
+                  "Campaigns",
+                  "Data Driven Experiences",
+                  "Digital Experiences",
+                  "Exhibitions",
+                  "Industrial/Product Design",
+                  "Motion Graphics & Film",
+                  "Packaging",
+                  "Publications",
+                  "Signage & Environmental Graphics",
+                  "Typefaces",
                 ].map((tag, i) => (
                   <div
                     key={i}
-                    className="bg-gray-100 rounded-md py-1 px-2 cursor-pointer hover:bg-gray-200"
+                    className="bg-gray-50 border border-gray-200 rounded-md py-1 px-2 cursor-pointer hover:bg-gray-100"
                   >
                     {tag}
                   </div>
                 ))}
               </div>
+
               <p className="text-center text-xs text-gray-600 mt-4">
                 We design <span className="underline">Everything</span> for{" "}
                 <span className="underline">Everyone</span>
               </p>
-              <div className="text-center mt-4">
-                <button
-                  onClick={() => setPopupOpen(false)}
-                  className="text-sm text-gray-600 underline"
-                >
-                  Close
-                </button>
-              </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </section>
+    </>
   );
 };
 
