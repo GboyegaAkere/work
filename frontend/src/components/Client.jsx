@@ -62,7 +62,7 @@ export default function Client() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Dots */}
+        
           <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex space-x-2">
             {slides.map((_, idx) => (
               <span
