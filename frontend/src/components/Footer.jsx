@@ -35,7 +35,7 @@ export default function Footer() {
             MINDSEYE
           </motion.h2>
 
-          <motion.div className="text-xs text-gray-400 space-y-1" initial="hidden" animate="visible" variants={containerVariants}>
+          <motion.div className="text-xs text-white space-y-1" initial="hidden" animate="visible" variants={containerVariants}>
             <motion.p variants={itemVariants}>A Full-Service Digital Marketing Agency</motion.p>
             <motion.p variants={itemVariants}>902 Marathon Icon</motion.p>
             <motion.p variants={itemVariants}>Off GK Marg, Lower Parel West</motion.p>
