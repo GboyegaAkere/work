@@ -128,7 +128,7 @@ const Hero = () => {
       {/* HERO SECTION */}
       <section
         ref={heroRef}
-        className="relative w-full h-screen overflow-hidden"
+        className="relative w-full h-200 md:h-screen overflow-hidden"
       >
         {/* Background */}
         <div className="absolute inset-0">
