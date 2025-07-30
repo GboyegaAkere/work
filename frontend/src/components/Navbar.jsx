@@ -46,7 +46,7 @@ const Navbar = () => {
 
       {/* Desktop Links */}
       <div
-        className={`hidden md:flex space-x-10 text-sm font-light ${
+        className={`hidden md:flex space-x-10 text-sm font-semibold ${
           solid ? "text-gray-600" : "text-white"
         }`}
       >

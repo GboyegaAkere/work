@@ -19,3 +19,37 @@
 .footer-link:hover::after {
   width: 100%;
 }
+
+/* In your main CSS file (e.g., src/index.css or src/App.css or src/globals.css) */
+
+.animated-underline {
+  position: relative;
+  display: inline-block; /* Or block, depending on desired layout */
+  text-decoration: none; /* Ensure no default underline */
+}
+
+.animated-underline::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0); /* Start with 0 width */
+  height: 1px; /* Underline thickness */
+  bottom: 0;
+  left: 0;
+  background-color: currentColor; /* Matches text color */
+  transform-origin: bottom left; /* Animation origin from left */
+  transition: transform 0.3s ease-out; /* Animation duration and easing */
+}
+
+.animated-underline:hover::after {
+  transform: scaleX(1); /* Expand to full width on hover */
+}
+
+/* Optional: Add a slight offset if needed */
+.animated-underline.offset-underline::after {
+  bottom: -2px; /* Adjust this value to move the underline down */
+}
+
+html {
+  scroll-behavior: smooth;
+}

@@ -16,20 +16,40 @@ const phrases = [
 ];
 
 const captions = [
-  { title: "Studio Theatre", description: "Yoto’s identity, environmental graphics can control." },
-  { title: "Tech Branding", description: "Crafting digital experiences for innovative." },
-  { title: "Cultural Exhibits", description: "Visual storytelling for leading cultural institutions." },
-  { title: "Fashion Identity", description: "Designing timeless visual identities for modern fashion brands." },
-  { title: "Education Projects", description: "Creating engaging educational tools." },
-  { title: "Travel Experiences", description: "Building immersive branding for travel." },
+  {
+    title: "Studio Theatre",
+    description: "Yoto’s identity, environmental graphics can control.",
+  },
+  {
+    title: "Tech Branding",
+    description: "Crafting digital experiences for innovative.",
+  },
+  {
+    title: "Cultural Exhibits",
+    description: "Visual storytelling for leading cultural institutions.",
+  },
+  {
+    title: "Fashion Identity",
+    description:
+      "Designing timeless visual identities for modern fashion brands.",
+  },
+  {
+    title: "Education Projects",
+    description: "Creating engaging educational tools.",
+  },
+  {
+    title: "Travel Experiences",
+    description: "Building immersive branding for travel.",
+  },
 ];
 
 const Hero = () => {
   const [bgIndex, setBgIndex] = useState(0);
   const [popupOpen, setPopupOpen] = useState(false);
   const [phraseIndex, setPhraseIndex] = useState(0);
-  const [isHeroVisible, setIsHeroVisible] = useState(true);
+  const [showSticky, setShowSticky] = useState(false);
   const [isFooterVisible, setIsFooterVisible] = useState(false);
+  const [isButtonTextStatic, setIsButtonTextStatic] = useState(false);
 
   const heroRef = useRef(null);
   const intervalRef = useRef(null);
@@ -58,19 +78,21 @@ const Hero = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Track hero visibility
+  // Scroll tracking to switch button position smoothly and update button text
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsHeroVisible(entry.isIntersecting),
-      { threshold: 0.1 }
-    );
-    if (heroRef.current) observer.observe(heroRef.current);
-    return () => {
-      if (heroRef.current) observer.unobserve(heroRef.current);
+    const handleScroll = () => {
+      // Button logic only applies when popup is not open
+      if (!popupOpen) {
+        const scrolledPastHero = window.scrollY > 100; // You can adjust this threshold
+        setShowSticky(scrolledPastHero);
+        setIsButtonTextStatic(scrolledPastHero); // Set static text when sticky
+      }
     };
-  }, []);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [popupOpen]); // Re-run effect when popupOpen changes
 
-  // Track footer visibility
+  // Track footer visibility to hide sticky button
   useEffect(() => {
     const footerElement = document.querySelector("footer");
     if (!footerElement) return;
@@ -82,10 +104,32 @@ const Hero = () => {
     return () => observer.disconnect();
   }, []);
 
+  // Define the dropdown icon SVG function for reusability with a direction prop
+  const DropdownIcon = ({ direction = "down" }) => (
+    <motion.svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={2}
+      stroke="currentColor"
+      className="w-4 h-4"
+      // Set initial rotation based on direction prop (no animation or transition)
+      style={{
+        transform:
+          direction === "up" ? "rotate(180deg)" : "rotate(0deg)", // Rotate 180 for 'up'
+      }}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+    </motion.svg>
+  );
+
   return (
     <>
       {/* HERO SECTION */}
-      <section ref={heroRef} className="relative w-full h-screen overflow-hidden">
+      <section
+        ref={heroRef}
+        className="relative w-full h-screen overflow-hidden"
+      >
         {/* Background */}
         <div className="absolute inset-0">
           <img
@@ -98,32 +142,81 @@ const Hero = () => {
         {/* Overlay */}
         <div className="absolute inset-0 bg-opacity-20" />
 
-        {/* Center Button */}
-        <div className="relative z-10 h-full flex items-center justify-center">
-          <button
-            onClick={() => setPopupOpen(true)}
-            className="bg-white bg-opacity-80 px-6 py-3 rounded-md text-sm text-black shadow-md backdrop-blur-md hover:bg-opacity-90 transition"
+        {/* Main Button (always visible unless footer is showing or popup is open) */}
+        {!popupOpen && ( // Only show this button if popup is NOT open
+          <motion.div
+            className="z-20 flex items-center justify-center w-full"
+            style={{
+              position: showSticky ? "fixed" : "absolute",
+              bottom: showSticky ? 20 : "50%",
+              left: 0,
+            }}
+            animate={{
+              y: showSticky ? 0 : "-40%",
+              scale: showSticky ? 0.9 : 1,
+              opacity: isFooterVisible ? 0 : 1,
+            }}
+            transition={{ duration: 0.4 }}
           >
-            We design{" "}
-            <span className="inline-flex items-center gap-2 min-w-[220px]">
-              <AnimatePresence mode="wait">
-                <motion.span
-                  key={phrases[phraseIndex]}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.4 }}
-                  className="font-medium"
-                >
-                  {phrases[phraseIndex]}
-                </motion.span>
-              </AnimatePresence>
-            </span>
-          </button>
-        </div>
+            <button
+              onClick={() => setPopupOpen(true)}
+              className="bg-gray-200 font-san bg-opacity-80 px-4 sm:px-6 py-2 sm:py-3 rounded-md text-sm sm:text-base text-black shadow-md backdrop-blur-md hover:bg-opacity-90 transition flex flex-wrap justify-center items-center gap-2 text-center max-w-[90%] mx-auto"
+            >
+              {isButtonTextStatic ? (
+                // Static text with icons when sticky
+                <>
+                  We design{" "}
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap text-center">
+                    Everything <DropdownIcon direction="up" />{" "}
+                  </span>
+                  <span className="px-1">for</span>
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap text-center">
+                    Everyone <DropdownIcon direction="down" />{" "}
+                  </span>
+                </>
+              ) : (
+                // Dynamic text with icons when not sticky
+                <>
+                  We design{" "}
+                  <span className="inline-flex items-center gap-1 whitespace-normal sm:whitespace-nowrap text-center">
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={phrases[phraseIndex] + "-first"}
+                        initial={{ opacity: 0, y: -50, rotateX: 90 }}
+                        animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                        exit={{ opacity: 0, y: 50, rotateX: -90 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="inline-block text-center"
+                      >
+                        {phrases[phraseIndex].split(" for ")[0]}
+                      </motion.span>
+                    </AnimatePresence>
+                    <DropdownIcon direction="up" />{" "}
+                  </span>
+                  <span className="px-1">for</span>
+                  <span className="inline-flex items-center gap-1 whitespace-normal sm:whitespace-nowrap text-center">
+                    <AnimatePresence mode="wait">
+                      <motion.span
+                        key={phrases[phraseIndex] + "-second"}
+                        initial={{ opacity: 0, y: -50, rotateX: 90 }}
+                        animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                        exit={{ opacity: 0, y: 50, rotateX: -90 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="inline-block text-center"
+                      >
+                        {phrases[phraseIndex].split(" for ")[1]}
+                      </motion.span>
+                    </AnimatePresence>
+                    <DropdownIcon direction="down" />{" "}
+                  </span>
+                </>
+              )}
+            </button>
+          </motion.div>
+        )}
 
         {/* Bottom Left Captions */}
-        <div className="absolute bottom-4 left-6 z-10 text-white text-sm max-w-xs">
+        <div className="absolute bottom-4 font-serif left-6 z-10 text-white text-sm max-w-xs">
           <AnimatePresence mode="wait">
             <motion.div
               key={bgIndex}
@@ -132,8 +225,12 @@ const Hero = () => {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.4 }}
             >
-              <p className="font-semibold text-base">{captions[bgIndex].title}</p>
-              <p className="text-xs hidden md:block">{captions[bgIndex].description}</p>
+              <p className="font-semibold text-base">
+                {captions[bgIndex].title}
+              </p>
+              <p className="text-xs hidden md:block">
+                {captions[bgIndex].description}
+              </p>
             </motion.div>
           </AnimatePresence>
         </div>
@@ -152,99 +249,117 @@ const Hero = () => {
         </div>
       </section>
 
-      {/* Sticky Bottom Button */}
-      <AnimatePresence>
-        {!isHeroVisible && !isFooterVisible && (
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            transition={{ duration: 0.4 }}
-            className="fixed bottom-4 left-0 right-0 z-50 flex justify-center"
-          >
-            <button
-              onClick={() => setPopupOpen(true)}
-              className="bg-white bg-opacity-80 px-6 py-3 rounded-md text-sm text-black shadow-md backdrop-blur-md hover:bg-opacity-90 transition"
-            >
-              We design{" "}
-              <span className="inline-flex items-center gap-2 min-w-[220px]">
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={phrases[phraseIndex]}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.4 }}
-                    className="font-medium"
-                  >
-                    {phrases[phraseIndex]}
-                  </motion.span>
-                </AnimatePresence>
-              </span>
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Popup Modal */}
       <AnimatePresence>
         {popupOpen && (
           <motion.div
-            className="fixed inset-0 bg-white/10 backdrop-blur-xl flex items-center justify-center z-50"
+            className="fixed inset-0 bg-black/10 backdrop-blur-md flex flex-col items-center justify-center z-50 p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setPopupOpen(false)}
           >
+            {/* Close Icon (Mobile Only, Centered, OUTSIDE popup) */}
+            <button
+              className="relative -top-6 md:hidden bg-white border border-gray-200 rounded-full w-10 h-10 flex items-center justify-center shadow hover:bg-gray-100 text-gray-700 mx-auto"
+              onClick={() => setPopupOpen(false)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+
             <motion.div
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-xl p-5 max-w-sm sm:max-w-xl w-full shadow-lg relative"
+              onClick={(e) => e.stopPropagation()} // Prevents clicking the modal from closing it
+              className="bg-gray-100 rounded-xl max-w-[800px] w-full shadow-lg relative overflow-hidden flex flex-col items-center p-4 md:p-0"
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
+              exit={{ scale: 0.2 }}
             >
-              {/* Close Icon (Mobile) */}
-              <button
-                className="absolute -top-6 left-1/2 -translate-x-1/2 bg-white border rounded-full w-10 h-10 flex items-center justify-center shadow hover:bg-gray-100 md:hidden"
-                onClick={() => setPopupOpen(false)}
-              >
-                ✕
-              </button>
-
-              {/* Image */}
+              {/* Image (Hidden on Mobile, Displayed on MD and Up) */}
               <img
                 src={heroImages[bgIndex]}
                 alt="popup"
-                className="rounded-md w-full h-64 object-cover"
+                className="w-[70%] h-80 object-cover object-center rounded-md mt-4 hidden md:block"
               />
 
-              {/* Tags */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4 text-xs text-center text-black">
-                {[
-                  "Books",
-                  "Brand Identity",
-                  "Brand Strategy",
-                  "Campaigns",
-                  "Digital Experiences",
-                  "Exhibitions",
-                  "Industrial/Product Design",
-                  "Motion Graphics & Film",
-                  "Packaging",
-                  "Typefaces",
-                ].map((tag, i) => (
-                  <div
-                    key={i}
-                    className="bg-gray-50 border border-gray-200 rounded-md py-1 px-2 cursor-pointer hover:bg-gray-100"
-                  >
-                    {tag}
-                  </div>
-                ))}
+              {/* Tags and "We design..." content */}
+              <div className="md:p-6 w-full pt-0 md:pt-6 flex flex-col items-center">
+                <div className="flex flex-wrap justify-center gap-2 text-xs text-center text-black">
+                  {[
+                    "Books",
+                    "Brand Identity",
+                    "Brand Strategy",
+                    "Campaigns",
+                    "Data Driven Experiences",
+                    "Digital Experiences",
+                    "Exhibitions",
+                    "Industrial/Product Design",
+                    "Motion Graphics & Film",
+                    "Packaging",
+                    "Publications",
+                    "Digital Experiences",
+                    "Exhibitions",
+                    "Industrial/Product Design",
+                    "Motion Graphics & Film",
+                    "Signage & Environmental Graphics",
+                    "Typefaces",
+                  ].map((tag, i) => (
+                    <div
+                      key={i}
+                      className="bg-gray-300 border h-6 px-3 border-gray-200 rounded-md justify-center text-center cursor-pointer hover:bg-gray-100 flex items-center"
+                    >
+                      {tag}
+                    </div>
+                  ))}
+                </div>
+                {/* Text version for Mobile Views (this is always visible on mobile, outside the popup button) */}
+                <p className="text-center text-xs text-gray-600 mt-4 pb-4 md:pb-0 md:hidden">
+                  We design <span className="underline">Everything</span> for{" "}
+                  <span className="underline">Everyone</span>
+                </p>
               </div>
+            </motion.div>
 
-              <p className="text-center text-xs text-gray-600 mt-4">
-                We design <span className="underline">Everything</span> for{" "}
-                <span className="underline">Everyone</span>
-              </p>
+            {/* NEW LOCATION FOR THE BUTTON: Below the popup modal, but still within the backdrop */}
+            {/* Added 'hidden md:flex' to hide on mobile and show as flex on medium+ screens */}
+            <motion.div
+              className="z-51 mt-6 hidden md:flex items-center justify-center w-full"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+            >
+              <button
+                // The onClick here is redundant as popup is already open.
+                // Consider if you want it to close the popup, or do nothing.
+                // For now, it just re-sets popupOpen to true, which is fine.
+                onClick={() => setPopupOpen(true)}
+                className="bg-gray-200 font-san bg-opacity-80 px-4 sm:px-6 py-2 sm:py-3 rounded-md text-sm sm:text-base text-black shadow-md backdrop-blur-md hover:bg-opacity-90 transition flex flex-wrap justify-center items-center gap-2 text-center max-w-[90%] mx-auto"
+              >
+                {/* When the popup is open, this button should show static text */}
+                <>
+                  We design{" "}
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap text-center">
+                    Everything <DropdownIcon direction="up" />{" "}
+                  </span>
+                  <span className="px-1">for</span>
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap text-center">
+                    Everyone <DropdownIcon direction="down" />{" "}
+                  </span>
+                </>
+              </button>
             </motion.div>
           </motion.div>
         )}

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import cat from "../assets/images/cat.gif"
+
 export default function Creativity() {
   return (
     <section className="w-full pt-26 bg-white h-130 flex flex-col md:flex-row items-start justify-center py-20 px-6 md:px-20">

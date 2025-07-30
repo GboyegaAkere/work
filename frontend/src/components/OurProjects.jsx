@@ -5,6 +5,11 @@ import vidd from "../assets/images/vidd.mp4";
 
 const projects = [
   {
+    title: "Websites – UX/UI",
+    image: jew,
+    video: vidd,
+  },
+  {
     title: "Branding",
     image: market,
     video: vidd,
@@ -19,6 +24,12 @@ const projects = [
     image: market,
     video: vidd,
   },
+  {
+    title: "Websites – UX/UI",
+    image: jew,
+    video: vidd,
+  },
+
   {
     title: "Websites – UX/UI",
     image: jew,
@@ -56,12 +67,12 @@ export default function OurProjects() {
               <motion.img
                 src={project.image}
                 alt={project.title}
-                className="w-full object-cover transition-transform duration-500 group-hover:opacity-0"
+                className="w-full object-cover transition-opacity duration-700 ease-in-out group-hover:opacity-0"
               />
 
               {/* Video (on hover) */}
               <video
-                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700 ease-in-out"
                 src={project.video}
                 autoPlay
                 loop

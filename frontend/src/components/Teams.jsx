@@ -1,6 +1,8 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import jew from "../assets/images/jew.webp";
+import logo1 from "../assets/images/Frame-1.png.webp"
+import logo2 from "../assets/images/Asset-1@3x-8-1.png.webp"
 
 export default function Teams() {
   const ref = useRef(null);
@@ -59,8 +61,9 @@ export default function Teams() {
 
         {/* Logos */}
         <div className="flex items-center space-x-6 mt-6">
-          <img src={jew} alt="Mindseye" className="h-6 md:h-8" />
-          <img src={jew} alt="Slidexpress" className="h-6 md:h-8" />
+          <img src={logo1} alt="Mindseye" className="h-4 md:h-8" />
+          <span className="text-3xl">|</span>
+          <img src={logo2} alt="Slidexpress" className="h-5 md:h-8" />
         </div>
       </div>
     </section>
