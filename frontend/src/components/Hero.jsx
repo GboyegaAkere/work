@@ -1,4 +1,3 @@
-/** @format */
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import blender from "../assets/images/flower.jpg";
@@ -54,7 +53,6 @@ const Hero = () => {
   const heroRef = useRef(null);
   const intervalRef = useRef(null);
 
-  // Auto-rotate hero images
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       setBgIndex((prev) => (prev + 1) % heroImages.length);
@@ -70,7 +68,6 @@ const Hero = () => {
     }, 4000);
   };
 
-  // Phrase rotation
   useEffect(() => {
     const interval = setInterval(() => {
       setPhraseIndex((prev) => (prev + 1) % phrases.length);
@@ -78,21 +75,18 @@ const Hero = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Scroll tracking to switch button position smoothly and update button text
   useEffect(() => {
     const handleScroll = () => {
-      // Button logic only applies when popup is not open
       if (!popupOpen) {
-        const scrolledPastHero = window.scrollY > 100; // You can adjust this threshold
+        const scrolledPastHero = window.scrollY > 100;
         setShowSticky(scrolledPastHero);
-        setIsButtonTextStatic(scrolledPastHero); // Set static text when sticky
+        setIsButtonTextStatic(scrolledPastHero);
       }
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [popupOpen]); // Re-run effect when popupOpen changes
+  }, [popupOpen]);
 
-  // Track footer visibility to hide sticky button
   useEffect(() => {
     const footerElement = document.querySelector("footer");
     if (!footerElement) return;
@@ -104,7 +98,6 @@ const Hero = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Define the dropdown icon SVG function for reusability with a direction prop
   const DropdownIcon = ({ direction = "down" }) => (
     <motion.svg
       xmlns="http://www.w3.org/2000/svg"
@@ -113,10 +106,9 @@ const Hero = () => {
       strokeWidth={2}
       stroke="currentColor"
       className="w-4 h-4"
-      // Set initial rotation based on direction prop (no animation or transition)
       style={{
         transform:
-          direction === "up" ? "rotate(180deg)" : "rotate(0deg)", // Rotate 180 for 'up'
+          direction === "up" ? "rotate(180deg)" : "rotate(0deg)",
       }}
     >
       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -125,12 +117,10 @@ const Hero = () => {
 
   return (
     <>
-      {/* HERO SECTION */}
       <section
         ref={heroRef}
         className="relative w-full h-200 md:h-screen overflow-hidden"
       >
-        {/* Background */}
         <div className="absolute inset-0">
           <img
             src={heroImages[bgIndex]}
@@ -139,11 +129,9 @@ const Hero = () => {
           />
         </div>
 
-        {/* Overlay */}
         <div className="absolute inset-0 bg-opacity-20" />
 
-        {/* Main Button (always visible unless footer is showing or popup is open) */}
-        {!popupOpen && ( // Only show this button if popup is NOT open
+        {!popupOpen && (
           <motion.div
             className="z-20 flex items-center justify-center w-full"
             style={{
@@ -163,7 +151,6 @@ const Hero = () => {
               className="bg-gray-200 font-san bg-opacity-80 px-4 sm:px-6 py-2 sm:py-3 rounded-md text-sm sm:text-base text-black shadow-md backdrop-blur-md hover:bg-opacity-90 transition flex flex-wrap justify-center items-center gap-2 text-center max-w-[90%] mx-auto"
             >
               {isButtonTextStatic ? (
-                // Static text with icons when sticky
                 <>
                   We design{" "}
                   <span className="inline-flex items-center gap-1 whitespace-nowrap text-center">
@@ -175,7 +162,6 @@ const Hero = () => {
                   </span>
                 </>
               ) : (
-                // Dynamic text with icons when not sticky
                 <>
                   We design{" "}
                   <span className="inline-flex items-center gap-1 whitespace-normal sm:whitespace-nowrap text-center">
@@ -215,7 +201,6 @@ const Hero = () => {
           </motion.div>
         )}
 
-        {/* Bottom Left Captions */}
         <div className="absolute bottom-4 font-serif left-6 z-10 text-white text-sm max-w-xs">
           <AnimatePresence mode="wait">
             <motion.div
@@ -235,7 +220,6 @@ const Hero = () => {
           </AnimatePresence>
         </div>
 
-        {/* Bottom Right Dots */}
         <div className="absolute bottom-4 right-6 z-10 hidden md:flex space-x-3">
           {heroImages.map((_, index) => (
             <div
@@ -249,7 +233,6 @@ const Hero = () => {
         </div>
       </section>
 
-      {/* Popup Modal */}
       <AnimatePresence>
         {popupOpen && (
           <motion.div
@@ -259,7 +242,6 @@ const Hero = () => {
             exit={{ opacity: 0 }}
             onClick={() => setPopupOpen(false)}
           >
-            {/* Close Icon (Mobile Only, Centered, OUTSIDE popup) */}
             <button
               className="relative -top-6 md:hidden bg-white border border-gray-200 rounded-full w-10 h-10 flex items-center justify-center shadow hover:bg-gray-100 text-gray-700 mx-auto"
               onClick={() => setPopupOpen(false)}
@@ -281,20 +263,18 @@ const Hero = () => {
             </button>
 
             <motion.div
-              onClick={(e) => e.stopPropagation()} // Prevents clicking the modal from closing it
+              onClick={(e) => e.stopPropagation()}
               className="bg-gray-100 rounded-xl max-w-[800px] w-full shadow-lg relative overflow-hidden flex flex-col items-center p-4 md:p-0"
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.2 }}
             >
-              {/* Image (Hidden on Mobile, Displayed on MD and Up) */}
               <img
                 src={heroImages[bgIndex]}
                 alt="popup"
                 className="w-[70%] h-80 object-cover object-center rounded-md mt-4 hidden md:block"
               />
 
-              {/* Tags and "We design..." content */}
               <div className="md:p-6 w-full pt-0 md:pt-6 flex flex-col items-center">
                 <div className="flex flex-wrap justify-center gap-2 text-xs text-center text-black">
                   {[
@@ -324,7 +304,6 @@ const Hero = () => {
                     </div>
                   ))}
                 </div>
-                {/* Text version for Mobile Views (this is always visible on mobile, outside the popup button) */}
                 <p className="text-center text-xs text-gray-600 mt-4 pb-4 md:pb-0 md:hidden">
                   We design <span className="underline">Everything</span> for{" "}
                   <span className="underline">Everyone</span>
@@ -332,8 +311,6 @@ const Hero = () => {
               </div>
             </motion.div>
 
-            {/* NEW LOCATION FOR THE BUTTON: Below the popup modal, but still within the backdrop */}
-            {/* Added 'hidden md:flex' to hide on mobile and show as flex on medium+ screens */}
             <motion.div
               className="z-51 mt-6 hidden md:flex items-center justify-center w-full"
               initial={{ opacity: 0, y: 50 }}
@@ -342,13 +319,9 @@ const Hero = () => {
               transition={{ duration: 0.3, delay: 0.1 }}
             >
               <button
-                // The onClick here is redundant as popup is already open.
-                // Consider if you want it to close the popup, or do nothing.
-                // For now, it just re-sets popupOpen to true, which is fine.
                 onClick={() => setPopupOpen(true)}
                 className="bg-gray-200 font-san bg-opacity-80 px-4 sm:px-6 py-2 sm:py-3 rounded-md text-sm sm:text-base text-black shadow-md backdrop-blur-md hover:bg-opacity-90 transition flex flex-wrap justify-center items-center gap-2 text-center max-w-[90%] mx-auto"
               >
-                {/* When the popup is open, this button should show static text */}
                 <>
                   We design{" "}
                   <span className="inline-flex items-center gap-1 whitespace-nowrap text-center">

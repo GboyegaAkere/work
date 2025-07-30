@@ -3,9 +3,9 @@ import { motion } from "framer-motion";
 
 export default function Basic() {
   const colorVariant = {
-    offscreen: { color: "#ffffff" }, // White when not visible
+    offscreen: { color: "#ffffff" },
     onscreen: {
-      color: "#00BCD4", // Teal when in view
+      color: "#00BCD4",
       transition: { duration: 0.6 },
     },
   };
@@ -13,7 +13,6 @@ export default function Basic() {
   return (
     <section className="bg-[#1a1a1a] text-center py-24 px-6">
       <div className="max-w-4xl mx-auto flex flex-col gap-20">
-        {/* First Pair */}
         <div>
           <h2 className="text-4xl sm:text-5xl md:text-7xl font-serif text-gray-300 flex items-baseline justify-center">
             Basic{" "}
@@ -44,7 +43,6 @@ export default function Basic() {
           </h2>
         </div>
 
-        {/* Second Pair */}
         <div>
           <h2 className="text-4xl sm:text-5xl md:text-7xl font-serif text-gray-300 flex items-baseline justify-center">
             Functional{" "}
@@ -75,7 +73,6 @@ export default function Basic() {
           </h2>
         </div>
 
-        {/* Third Pair */}
         <div>
           <h2 className="text-4xl sm:text-5xl md:text-7xl font-serif text-gray-300 flex items-baseline justify-center">
             Classic{" "}

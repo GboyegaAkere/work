@@ -7,13 +7,11 @@ import logo2 from "../assets/images/Asset-1@3x-8-1.png.webp"
 export default function Teams() {
   const ref = useRef(null);
 
-  // Track scroll progress for parallax
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"],
   });
 
-  // Vertical parallax movement
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
 
   return (
@@ -21,13 +19,11 @@ export default function Teams() {
       ref={ref}
       className="relative w-full h-auto md:h-screen flex flex-col md:flex-row items-center justify-center md:items-start md:justify-start overflow-hidden"
     >
-      {/* Desktop parallax background */}
       <motion.div
         style={{ y, backgroundImage: `url(${jew})` }}
         className="hidden md:block absolute inset-0 bg-cover bg-center scale-110"
       ></motion.div>
 
-      {/* Mobile parallax image */}
       <motion.img
         style={{ y }}
         src={jew}
@@ -35,10 +31,8 @@ export default function Teams() {
         className="block md:hidden w-full h-85 md:64 object-cover scale-110"
       />
 
-      {/* Overlay (optional) */}
       <div className="hidden md:block absolute inset-0 bg-black/20"></div>
 
-      {/* Content Card (Left Center) */}
       <div
         className="relative md:max-w-3xl bg-white/70 backdrop-blur-md p-8 md:p-12 rounded-md shadow-md text-left
         mt-6 md:mt-0 md:absolute md:top-1/2 md:left-20 md:-translate-y-1/2"
@@ -59,7 +53,6 @@ export default function Teams() {
           research and insights.
         </p>
 
-        {/* Logos */}
         <div className="flex items-center space-x-6 mt-6">
           <img src={logo1} alt="Mindseye" className="h-4 md:h-8" />
           <span className="text-3xl">|</span>
