@@ -42,6 +42,49 @@ const captions = [
   },
 ];
 
+const everythingOptions = [
+  "Books",
+  "Brand Identity",
+  "Brand Strategy",
+  "Motion Graphics & Film",
+  "Packaging",
+  "Publications",
+  "Campaigns",
+  "Data Driven Experiences",
+  "Digital Experiences",
+  "Exhibitions",
+  "Industrial/Product Design",
+  "Motion Graphics & Film",
+  "Packaging",
+  "Publications",
+  "Signage & Environmental Graphics",
+  "Typefaces",
+];
+
+const everyoneOptions = [
+  "Arts & Culture",
+  "Civic & Public",
+  "Consumer Brands",
+  "Education",
+  "Entertainment",
+  "Fashion & Beauty",
+  "Finance",
+  "Food & Drink",
+  "Health",
+  "Hospitality & Travel",
+  "Manufacturing & Industrials",
+  "Non-profits",
+  "Professional Services",
+  "Publishing",
+  "Real Estate",
+  "Technology",
+  "Transport",
+];
+
+const allCategories = [...new Set([...everythingOptions, ...everyoneOptions])];
+
+const MOBILE_BREAKPOINT = 768;
+
 const Hero = () => {
   const [bgIndex, setBgIndex] = useState(0);
   const [popupOpen, setPopupOpen] = useState(false);
@@ -49,10 +92,26 @@ const Hero = () => {
   const [showSticky, setShowSticky] = useState(false);
   const [isFooterVisible, setIsFooterVisible] = useState(false);
   const [isButtonTextStatic, setIsButtonTextStatic] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < MOBILE_BREAKPOINT);
+  const [isSpinning, setIsSpinning] = useState(false); // State for spinning effect
+  const [currentDisplayPart1, setCurrentDisplayPart1] = useState(""); // Text displayed during spin or final
+  const [currentDisplayPart2, setCurrentDisplayPart2] = useState(""); // Text displayed during spin or final
+
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState("Everything");
 
   const heroRef = useRef(null);
   const intervalRef = useRef(null);
+  const popupContentRef = useRef(null);
+  const filterElementRef = useRef(null);
 
+  // Initialize display parts with the first phrase on mount
+  useEffect(() => {
+    const [part1, part2] = phrases[0].split(" for ");
+    setCurrentDisplayPart1(part1);
+    setCurrentDisplayPart2(part2);
+  }, []);
+
+  // Background image rotation
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       setBgIndex((prev) => (prev + 1) % heroImages.length);
@@ -68,12 +127,61 @@ const Hero = () => {
     }, 4000);
   };
 
+  // Modified useEffect for phrase rotation with "spin and stop" effect
   useEffect(() => {
-    const interval = setInterval(() => {
-      setPhraseIndex((prev) => (prev + 1) % phrases.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+    let spinTimeout;
+    let spinInterval;
+
+    const animateNextPhrase = () => {
+      // Clear any existing timeouts/intervals to prevent overlaps
+      clearTimeout(spinTimeout);
+      clearInterval(spinInterval);
+
+      // 1. Display the current "stopped" phrase
+      const [initialPart1, initialPart2] = phrases[phraseIndex].split(" for ");
+      setCurrentDisplayPart1(initialPart1);
+      setCurrentDisplayPart2(initialPart2);
+      setIsSpinning(false); // Ensure it's not spinning when showing the final phrase
+
+      // 2. After a delay (the "stop" duration), start the spin
+      spinTimeout = setTimeout(() => {
+        setIsSpinning(true); // Indicate spinning state for animation transition
+        let currentSpinCount = 0;
+        const totalSpins = 5; // How many random words to show during the spin (quick changes)
+        const spinDuration = 100; // Milliseconds per word change during spin
+
+        spinInterval = setInterval(() => {
+          if (currentSpinCount < totalSpins) {
+            // Display random words during the rapid spin
+            const randomEverything = everythingOptions[Math.floor(Math.random() * everythingOptions.length)];
+            const randomEveryone = everyoneOptions[Math.floor(Math.random() * everyoneOptions.length)];
+            setCurrentDisplayPart1(randomEverything);
+            setCurrentDisplayPart2(randomEveryone);
+            currentSpinCount++;
+          } else {
+            // 3. Stop spinning and set the actual next phrase
+            clearInterval(spinInterval); // Stop the rapid spinning
+            setIsSpinning(false); // End spinning state
+
+            // Update phraseIndex to the next phrase
+            setPhraseIndex((prev) => {
+              const nextIndex = (prev + 1) % phrases.length;
+              return nextIndex;
+            });
+          }
+        }, spinDuration);
+      }, 2000); // Display current phrase for 2 seconds (the "stop" duration)
+    };
+
+    // Start the first animation cycle
+    animateNextPhrase();
+
+    // Cleanup function: Clear any active timers when the component unmounts
+    return () => {
+      clearTimeout(spinTimeout);
+      clearInterval(spinInterval);
+    };
+  }, [phraseIndex]); // Re-run effect when phraseIndex changes, which now drives the sequence
 
   useEffect(() => {
     const handleScroll = () => {
@@ -98,22 +206,64 @@ const Hero = () => {
     return () => observer.disconnect();
   }, []);
 
-  const DropdownIcon = ({ direction = "down" }) => (
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!popupOpen) {
+      setActiveCategoryFilter("Everything");
+    }
+  }, [popupOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (popupOpen) {
+        if (!isMobile && popupContentRef.current && filterElementRef.current) {
+          if (!popupContentRef.current.contains(event.target) && !filterElementRef.current.contains(event.target)) {
+            setPopupOpen(false);
+          }
+        }
+        else if (isMobile && popupContentRef.current && !popupContentRef.current.contains(event.target)) {
+          setPopupOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [popupOpen, isMobile]);
+
+  const DropdownIcon = ({ isActive }) => (
     <motion.svg
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
       strokeWidth={2}
       stroke="currentColor"
-      className="w-4 h-4"
-      style={{
-        transform:
-          direction === "up" ? "rotate(180deg)" : "rotate(0deg)",
-      }}
+      className="w-4 h-4 transition-transform duration-200"
+      animate={{ rotate: isActive ? 180 : 0 }}
     >
       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
     </motion.svg>
   );
+
+  const getCategoriesToDisplay = () => {
+    switch (activeCategoryFilter) {
+      case "Everything":
+        return everythingOptions;
+      case "Everyone":
+        return everyoneOptions;
+      default:
+        return everythingOptions;
+    }
+  };
 
   return (
     <>
@@ -131,6 +281,7 @@ const Hero = () => {
 
         <div className="absolute inset-0 bg-opacity-20" />
 
+        {/* Main hero button that opens the popup */}
         {!popupOpen && (
           <motion.div
             className="z-20 flex items-center justify-center w-full"
@@ -148,52 +299,63 @@ const Hero = () => {
           >
             <button
               onClick={() => setPopupOpen(true)}
-              className="bg-gray-200 font-san bg-opacity-80 px-4 sm:px-6 py-2 sm:py-3 rounded-md text-sm sm:text-base text-black shadow-md backdrop-blur-md hover:bg-opacity-90 transition flex flex-wrap justify-center items-center gap-2 text-center max-w-[90%] mx-auto"
+              // Retaining the button's min-width, but the key change is within the spinning spans
+              className={`bg-gray-200 font-san bg-opacity-80 px-4 sm:px-6 py-2 sm:py-3 rounded-md text-sm sm:text-base text-black shadow-md backdrop-blur-md hover:bg-opacity-90 transition flex flex-wrap justify-center items-center gap-2 text-center max-w-[90%] mx-auto ${
+                !isButtonTextStatic ? 'min-w-[12rem]' : ''
+              }`}
             >
               {isButtonTextStatic ? (
                 <>
                   We design{" "}
                   <span className="inline-flex items-center gap-1 whitespace-nowrap text-center">
-                    Everything <DropdownIcon direction="up" />{" "}
+                    Everything <DropdownIcon />{" "}
                   </span>
                   <span className="px-1">for</span>
                   <span className="inline-flex items-center gap-1 whitespace-nowrap text-center">
-                    Everyone <DropdownIcon direction="down" />{" "}
+                    Everyone <DropdownIcon />{" "}
                   </span>
                 </>
               ) : (
                 <>
                   We design{" "}
                   <span className="inline-flex items-center gap-1 whitespace-normal sm:whitespace-nowrap text-center">
-                    <AnimatePresence mode="wait">
-                      <motion.span
-                        key={phrases[phraseIndex] + "-first"}
-                        initial={{ opacity: 0, y: -50, rotateX: 90 }}
-                        animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                        exit={{ opacity: 0, y: 50, rotateX: -90 }}
-                        transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="inline-block text-center"
-                      >
-                        {phrases[phraseIndex].split(" for ")[0]}
-                      </motion.span>
-                    </AnimatePresence>
-                    <DropdownIcon direction="up" />{" "}
+                    {/* BEGIN: Fixed-width container for spinning text part 1 */}
+                    <span className="relative inline-flex items-center justify-center text-center overflow-hidden min-w-[8rem] max-w-[18rem]"> {/* Adjust min/max widths as needed */}
+                      <AnimatePresence mode="wait">
+                        <motion.span
+                          key={currentDisplayPart1} // Key changes based on `currentDisplayPart1`
+                          initial={{ opacity: 0, y: -5 }} // Reduced vertical movement
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 5 }} // Reduced vertical movement
+                          transition={{ duration: isSpinning ? 0.05 : 0.15, ease: "easeOut" }}
+                          className="inline-block whitespace-nowrap" // Prevents text wrapping
+                        >
+                          {currentDisplayPart1}
+                        </motion.span>
+                      </AnimatePresence>
+                    </span>
+                    {/* END: Fixed-width container for spinning text part 1 */}
+                    <DropdownIcon />{" "}
                   </span>
                   <span className="px-1">for</span>
                   <span className="inline-flex items-center gap-1 whitespace-normal sm:whitespace-nowrap text-center">
-                    <AnimatePresence mode="wait">
-                      <motion.span
-                        key={phrases[phraseIndex] + "-second"}
-                        initial={{ opacity: 0, y: -50, rotateX: 90 }}
-                        animate={{ opacity: 1, y: 0, rotateX: 0 }}
-                        exit={{ opacity: 0, y: 50, rotateX: -90 }}
-                        transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="inline-block text-center"
-                      >
-                        {phrases[phraseIndex].split(" for ")[1]}
-                      </motion.span>
-                    </AnimatePresence>
-                    <DropdownIcon direction="down" />{" "}
+                    {/* BEGIN: Fixed-width container for spinning text part 2 */}
+                    <span className="relative inline-flex items-center justify-center text-center overflow-hidden min-w-[8rem] max-w-[18rem]"> {/* Adjust min/max widths as needed */}
+                      <AnimatePresence mode="wait">
+                        <motion.span
+                          key={currentDisplayPart2} // Key changes based on `currentDisplayPart2`
+                          initial={{ opacity: 0, y: -5 }} // Reduced vertical movement
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 5 }} // Reduced vertical movement
+                          transition={{ duration: isSpinning ? 0.05 : 0.15, ease: "easeOut" }}
+                          className="inline-block whitespace-nowrap" // Prevents text wrapping
+                        >
+                          {currentDisplayPart2}
+                        </motion.span>
+                      </AnimatePresence>
+                    </span>
+                    {/* END: Fixed-width container for spinning text part 2 */}
+                    <DropdownIcon />{" "}
                   </span>
                 </>
               )}
@@ -233,6 +395,7 @@ const Hero = () => {
         </div>
       </section>
 
+      {/* This is the popup section */}
       <AnimatePresence>
         {popupOpen && (
           <motion.div
@@ -242,9 +405,13 @@ const Hero = () => {
             exit={{ opacity: 0 }}
             onClick={() => setPopupOpen(false)}
           >
+            {/* Mobile close button (top) */}
             <button
               className="relative -top-6 md:hidden bg-white border border-gray-200 rounded-full w-10 h-10 flex items-center justify-center shadow hover:bg-gray-100 text-gray-700 mx-auto"
-              onClick={() => setPopupOpen(false)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setPopupOpen(false);
+              }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -263,8 +430,10 @@ const Hero = () => {
             </button>
 
             <motion.div
+              ref={popupContentRef}
               onClick={(e) => e.stopPropagation()}
-              className="bg-gray-100 rounded-xl max-w-[800px] w-full shadow-lg relative overflow-hidden flex flex-col items-center p-4 md:p-0"
+              // MODIFIED: Adjusted width and height for desktop popup
+              className="bg-gray-100 rounded-xl md:max-w-[878px] md:h-[569px] w-full shadow-lg relative overflow-hidden flex flex-col items-center p-4 md:p-0"
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.2 }}
@@ -276,64 +445,94 @@ const Hero = () => {
               />
 
               <div className="md:p-6 w-full pt-0 md:pt-6 flex flex-col items-center">
-                <div className="flex flex-wrap justify-center gap-2 text-xs text-center text-black">
-                  {[
-                    "Books",
-                    "Brand Identity",
-                    "Brand Strategy",
-                    "Campaigns",
-                    "Data Driven Experiences",
-                    "Digital Experiences",
-                    "Exhibitions",
-                    "Industrial/Product Design",
-                    "Motion Graphics & Film",
-                    "Packaging",
-                    "Publications",
-                    "Digital Experiences",
-                    "Exhibitions",
-                    "Industrial/Product Design",
-                    "Motion Graphics & Film",
-                    "Signage & Environmental Graphics",
-                    "Typefaces",
-                  ].map((tag, i) => (
-                    <div
-                      key={i}
-                      className="bg-gray-300 border h-6 px-3 border-gray-200 rounded-md justify-center text-center cursor-pointer hover:bg-gray-100 flex items-center"
+                {/* Display filtered categories */}
+                <div className="flex flex-wrap justify-center gap-2 text-xs text-center text-black mt-4 w-full px-4 md:px-0">
+                  <AnimatePresence initial={false} mode="wait">
+                    <motion.div
+                      key={activeCategoryFilter}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex flex-wrap justify-center gap-2 w-full"
                     >
-                      {tag}
-                    </div>
-                  ))}
+                      {getCategoriesToDisplay().map((tag) => (
+                        <div
+                          key={tag}
+                          className="bg-gray-300 border h-6 px-3 border-gray-200 rounded-md justify-center text-center flex items-center cursor-pointer hover:bg-gray-400 hover:text-white transition-colors duration-200"
+                        >
+                          {tag}
+                        </div>
+                      ))}
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
-                <p className="text-center text-xs text-gray-600 mt-4 pb-4 md:pb-0 md:hidden">
-                  We design <span className="underline">Everything</span> for{" "}
-                  <span className="underline">Everyone</span>
-                </p>
+
+                {/* Mobile Filter Element: Inside the popup content */}
+                {isMobile && (
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    className="font-san text-sm text-black text-center mt-6 p-2 w-full max-w-[90%] mx-auto"
+                  >
+                    We design{" "}
+                    <span
+                      className={`inline-flex items-center gap-1 whitespace-nowrap cursor-pointer ${activeCategoryFilter === 'Everything' ? 'font-bold' : 'hover:text-gray-700'}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveCategoryFilter("Everything");
+                      }}
+                    >
+                      Everything <DropdownIcon isActive={activeCategoryFilter === 'Everything'} />
+                    </span>
+                    <span className="px-1">for</span>
+                    <span
+                      className={`inline-flex items-center gap-1 whitespace-nowrap cursor-pointer ${activeCategoryFilter === 'Everyone' ? 'font-bold' : 'hover:text-gray-700'}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveCategoryFilter("Everyone");
+                      }}
+                    >
+                      Everyone <DropdownIcon isActive={activeCategoryFilter === 'Everyone'} />
+                    </span>
+                  </div>
+                )}
               </div>
             </motion.div>
 
-            <motion.div
-              className="z-51 mt-6 hidden md:flex items-center justify-center w-full"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 50 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              <button
-                onClick={() => setPopupOpen(true)}
-                className="bg-gray-200 font-san bg-opacity-80 px-4 sm:px-6 py-2 sm:py-3 rounded-md text-sm sm:text-base text-black shadow-md backdrop-blur-md hover:bg-opacity-90 transition flex flex-wrap justify-center items-center gap-2 text-center max-w-[90%] mx-auto"
+            {/* Desktop Filter Element: Outside the popup content */}
+            {!isMobile && (
+              <motion.button
+                ref={filterElementRef}
+                onClick={(e) => e.stopPropagation()}
+                // MODIFIED: Removed transparency and backdrop-blur, adjusted hover effect
+                className="z-51 font-san bg-gray-200 px-4 sm:px-6 py-2 sm:py-3 rounded-md text-sm sm:text-base text-black shadow-md hover:bg-gray-300 transition flex flex-wrap justify-center items-center gap-2 text-center max-w-[90%] mx-auto"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: -30 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
               >
-                <>
-                  We design{" "}
-                  <span className="inline-flex items-center gap-1 whitespace-nowrap text-center">
-                    Everything <DropdownIcon direction="up" />{" "}
-                  </span>
-                  <span className="px-1">for</span>
-                  <span className="inline-flex items-center gap-1 whitespace-nowrap text-center">
-                    Everyone <DropdownIcon direction="down" />{" "}
-                  </span>
-                </>
-              </button>
-            </motion.div>
+                We design{" "}
+                <span
+                  className={`inline-flex items-center gap-1 whitespace-nowrap text-center cursor-pointer ${activeCategoryFilter === 'Everything' ? 'font-bold' : 'hover:text-gray-700'}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveCategoryFilter("Everything");
+                  }}
+                >
+                  Everything <DropdownIcon isActive={activeCategoryFilter === 'Everything'} />
+                </span>
+                <span className="px-1">for</span>
+                <span
+                  className={`inline-flex items-center gap-1 whitespace-nowrap text-center cursor-pointer ${activeCategoryFilter === 'Everyone' ? 'font-bold' : 'hover:text-gray-700'}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveCategoryFilter("Everyone");
+                  }}
+                >
+                  Everyone <DropdownIcon isActive={activeCategoryFilter === 'Everyone'} />
+                </span>
+              </motion.button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
