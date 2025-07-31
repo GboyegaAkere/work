@@ -30,7 +30,7 @@ const captions = [
   {
     title: "Fashion Identity",
     description:
-      "Designing timeless visual identities for modern fashion brands.",
+      "Designing timeless visual identitie for modern fashion brands.",
   },
   {
     title: "Education Projects",
