@@ -432,8 +432,7 @@ const Hero = () => {
             <motion.div
               ref={popupContentRef}
               onClick={(e) => e.stopPropagation()}
-              // MODIFIED: Adjusted width and height for desktop popup
-              className="bg-gray-100 rounded-xl md:max-w-[878px] md:h-[569px] w-full shadow-lg relative overflow-hidden flex flex-col items-center p-4 md:p-0"
+              className="bg-gray-100 rounded-xl max-w-[800px] w-full shadow-lg relative overflow-hidden flex flex-col items-center p-4 md:p-0"
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.2 }}
